@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CoinVault - Transactions</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 260px;
+            background: rgba(255, 255, 255, 0.98);
+            padding: 24px 0;
+            box-shadow: 4px 0 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            padding: 0 24px 24px;
+            font-size: 28px;
+            font-weight: 700;
+            color: #667eea;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-item {
+            padding: 14px 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #4a5568;
+            font-size: 15px;
+        }
+
+        .nav-item:hover {
+            background: #f7fafc;
+            color: #667eea;
+        }
+
+        .nav-item.active {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-right: 4px solid #764ba2;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 32px;
+            overflow-y: auto;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 24px 28px;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            margin-bottom: 24px;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            color: #2d3748;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-secondary:hover {
+            background: #f7fafc;
+        }
+
+        .filters {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .filter-input {
+            padding: 10px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .filter-select {
+            padding: 10px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+        }
+
+        .card {
+            background: white;
+            padding: 28px;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .transaction-list {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid #e2e8f0;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .transaction-item:hover {
+            background: #f7fafc;
+            transform: translateX(4px);
+        }
+
+        .transaction-item:last-child {
+            border-bottom: none;
+        }
+
+        .transaction-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .transaction-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+
+        .transaction-details h4 {
+            font-size: 15px;
+            color: #2d3748;
+            margin-bottom: 4px;
+        }
+
+        .transaction-details p {
+            font-size: 13px;
+            color: #718096;
+        }
+
+        .transaction-meta {
+            text-align: right;
+        }
+
+        .transaction-amount {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .amount-expense {
+            color: #e53e3e;
+        }
+
+        .amount-income {
+            color: #38a169;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .tag-recurring {
+            background: #feebc8;
+            color: #7c2d12;
+        }
+
+        /* Add Transaction Form */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 16px;
+            margin-top: 8px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .radio-option input[type="radio"] {
+            cursor: pointer;
+        }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .category-btn {
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            font-size: 13px;
+        }
+
+        .category-btn:hover {
+            border-color: #667eea;
+            background: #f7fafc;
+        }
+
+        .category-btn.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .category-icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #4a5568;
+            cursor: pointer;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn-full {
+            flex: 1;
+        }
+
+        .stats-mini {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-mini {
+            padding: 16px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+        }
+
+        .stat-mini-label {
+            font-size: 12px;
+            color: #718096;
+            margin-bottom: 4px;
+        }
+
+        .stat-mini-value {
+            font-size: 22px;
+            font-weight: 700;
+            color: #2d3748;
+        }
+
+        @media (max-width: 1200px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo">💰 CoinVault</div>
+            <nav>
+                <div class="nav-item">
+                    <span>📊</span> Dashboard
+                </div>
+                <div class="nav-item active">
+                    <span>💳</span> Transactions
+                </div>
+                <div class="nav-item">
+                    <span>📁</span> Categories
+                </div>
+                <div class="nav-item">
+                    <span>🎯</span> Budgets
+                </div>
+                <div class="nav-item">
+                    <span>💰</span> Savings Goals
+                </div>
+                <div class="nav-item">
+                    <span>📈</span> Reports
+                </div>
+                <div class="nav-item">
+                    <span>🔔</span> Notifications
+                </div>
+                <div class="nav-item">
+                    <span>⚙️</span> Settings
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="header">
+                <div class="header-top">
+                    <h1>Transactions</h1>
+                    <div style="display: flex; gap: 12px;">
+                        <button class="btn btn-secondary">📤 Import CSV</button>
+                        <button class="btn btn-secondary">📥 Export</button>
+                    </div>
+                </div>
+                <div class="filters">
+                    <input type="text" class="filter-input" placeholder="🔍 Search transactions..." style="min-width: 280px;">
+                    <select class="filter-select">
+                        <option>All Categories</option>
+                        <option>Food & Dining</option>
+                        <option>Transportation</option>
+                        <option>Entertainment</option>
+                        <option>Healthcare</option>
+                    </select>
+                    <select class="filter-select">
+                        <option>All Types</option>
+                        <option>Income</option>
+                        <option>Expense</option>
+                    </select>
+                    <input type="date" class="filter-input" value="2025-10-01">
+                    <input type="date" class="filter-input" value="2025-10-03">
+                </div>
+            </div>
+
+            <div class="content-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">All Transactions</h2>
+                        <span style="color: #718096; font-size: 14px;">238 transactions</span>
+                    </div>
+                    
+                    <div class="transaction-list">
+                        <div class="transaction-item">
+                            <div class="transaction-info">
+                                <div class="transaction-icon" style="background: #fed7d7;">🍔</div>
+                                <div class="transaction-details">
+                                    <h4>Restaurant Dinner</h4>
+                                    <p>Food & Dining • Main Account</p>
+                                </div>
+                            </div>
+                            <div class="transaction-meta">
+                                <div class="transaction-amount amount-expense">-$45.00</div>
+                                <p style="font-size: 12px; color: #718096;">Today, 7:30 PM</p>
+                            </div>
+                        </div>
+
+                        <div class="transaction-item">
+                            <div class="transaction-info">
+                                <div class="transaction-icon" style="background: #c6f6d5;">💼</div>
+                                <div class="transaction-details">
+                                    <h4>Monthly Salary</h4>
+                                    <p>Income • Checking Account</p>
+                                </div>
+                            </div>
+                            <div class="transaction-meta">
+                                <div class="transaction-amount amount-income">+$8,400.00</div>
+                                <p style="font-size: 12px; color: #718096;">Oct 1, 2025</p>
+                            </div>
+                        </div>
+
+                        <div class="transaction-item">
+                            <div class="transaction-info">
+                                <div class="transaction-icon" style="background: #feebc8;">🛒</div>
+                                <div class="transaction-details">
+                                    <h4>Weekly Grocery Shopping</h4>
+                                    <p>Food & Dining • Credit Card</p>
+                                </div>
+                            </div>
+                            <div class="transaction-meta">
+                                <div class="transaction-amount amount-expense">-$127.50</div>
+                                <p style="font-size: 12px; color: #718096;">Oct 2, 2025</p>
+                            </div>
+                        </div>
+
+                        <div class="transaction-item">
+                            <div class="transaction-info">
+                                <div class="transaction-icon" style="background: #e9d8fd;">⚡</div>
+                                <div class="transaction-details">
+                                    <h4>Electricity Bill</h4>
+                                    <p>Utilities • Main Account</p>
+                                </div>
+                            </div>
+                            <div class="transaction-meta">
+                                <div class="transaction-amount amount-expense">-$89.00</div>
+                                <div><span class="tag tag-recurring">🔁 Recurring</span></div>
+                            </div>
+                        </div>
+
+                        <div class="transaction-item">
+                            <div class="transaction-info">
+                                <div class="transaction-icon" style="background: #bee3f8;">🎬</div>
+                                <div class="transaction-details">
+                                    <h4>Netflix Subscription</h4>
+                                    <p>Entertainment • Credit Card</p>
+                                </div>
+                            </div>
+                            <div class="transaction-meta">
+                                <div class="transaction-amount amount-expense">-$15.99</div>
+                                <div><span class="tag tag-recurring">🔁 Recurring</span></div>
+                            </div>
+                        </div>
+
+                        <div class="transaction-item">
+                            <div class="transaction-info">
+                                <div class="transaction-icon" style="background: #fef5e7;">☕</div>
+                                <div class="transaction-details">
+                                    <h4>Coffee Shop</h4>
+                                    <p>Food & Dining • Main Account</p>
+                                </div>
+                            </div>
+                            <div class="transaction-meta">
+                                <div class="transaction-amount amount-expense">-$6.50</div>
+                                <p style="font-size: 12px; color: #718096;">Oct 2, 2025</p>
+                            </div>
+                        </div>
+
+                        <div class="transaction-item">
+                            <div class="transaction-info">
+                                <div class="transaction-icon" style="background: #fde2e4;">🚗</div>
+                                <div class="transaction-details">
+                                    <h4>Gas Station</h4>
+                                    <p>Transportation • Credit Card</p>
+                                </div>
+                            </div>
+                            <div class="transaction-meta">
+                                <div class="transaction-amount amount-expense">-$52.00</div>
+                                <p style="font-size: 12px; color: #718096;">Oct 1, 2025</p>
+                            </div>
+                        </div>
+
+                        <div class="transaction-item">
+                            <div class="transaction-info">
+                                <div class="transaction-icon" style="background: #c6f6d5;">📱</div>
+                                <div class="transaction-details">
+                                    <h4>Freelance Project Payment</h4>
+                                    <p>Income • Checking Account</p>
+                                </div>
+                            </div>
+                            <div class="transaction-meta">
+                                <div class="transaction-amount amount-income">+$1,200.00</div>
+                                <p style="font-size: 12px; color: #718096;">Sep 30, 2025</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="card" style="margin-bottom: 24px;">
+                        <h3 class="card-title" style="margin-bottom: 20px;">Quick Stats</h3>
+                        <div class="stats-mini">
+                            <div class="stat-mini">
+                                <div class="stat-mini-label">This Month</div>
+                                <div class="stat-mini-value" style="color: #e53e3e;">-$3,240</div>
+                            </div>
+                            <div class="stat-mini">
+                                <div class="stat-mini-label">Total Income</div>
+                                <div class="stat-mini-value" style="color: #38a169;">+$8,400</div>
+                            </div>
+                        </div>
+                        <div style="padding: 16px; background: #f7fafc; border-radius: 10px;">
+                            <div style="font-size: 13px; color: #718096; margin-bottom: 4px;">Daily Average</div>
+                            <div style="font-size: 20px; font-weight: 700; color: #2d3748;">$108.00</div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="card-title" style="margin-bottom: 20px;">Add Transaction</h3>
+                        
+                        <form>
+                            <div class="form-group">
+                                <label class="form-label">Type</label>
+                                <div class="radio-group">
+                                    <label class="radio-option">
+                                        <input type="radio" name="type" value="expense" checked>
+                                        <span>💸 Expense</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="type" value="income">
+                                        <span>💰 Income</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Amount</label>
+                                <input type="number" class="form-input" placeholder="0.00" step="0.01">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Category</label>
+                                <div class="category-grid">
+                                    <button type="button" class="category-btn selected">
+                                        <div class="category-icon">🍔</div>
+                                        <div>Food</div>
+                                    </button>
+                                    <button type="button" class="category-btn">
+                                        <div class="category-icon">🚗</div>
+                                        <div>Transport</div>
+                                    </button>
+                                    <button type="button" class="category-btn">
+                                        <div class="category-icon">🎬</div>
+                                        <div>Fun</div>
+                                    </button>
+                                    <button type="button" class="category-btn">
+                                        <div class="category-icon">🏥</div>
+                                        <div>Health</div>
+                                    </button>
+                                    <button type="button" class="category-btn">
+                                        <div class="category-icon">🏠</div>
+                                        <div>Home</div>
+                                    </button>
+                                    <button type="button" class="category-btn">
+                                        <div class="category-icon">📱</div>
+                                        <div>Bills</div>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Date</label>
+                                    <input type="date" class="form-input" value="2025-10-03">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Account</label>
+                                    <select class="form-input">
+                                        <option>Main Account</option>
+                                        <option>Credit Card</option>
+                                        <option>Checking Account</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Description</label>
+                                <input type="text" class="form-input" placeholder="Add note...">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox">
+                                    <span>🔁 Make this recurring</span>
+                                </label>
+                            </div>
+
+                            <div class="action-buttons">
+                                <button type="submit" class="btn btn-primary btn-full">Add Transaction</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

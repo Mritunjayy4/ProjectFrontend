@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications - CoinVault</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            margin-left: 240px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .header-left h1 {
+            color: white;
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .header-left p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .mark-read-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mark-read-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .filter-btn {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .filter-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .notifications-container {
+            max-width: 900px;
+        }
+
+        .notification-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            gap: 20px;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .notification-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .notification-card.unread {
+            border-left: 4px solid #667eea;
+            background: #f8f9ff;
+        }
+
+        .notification-card.unread::before {
+            content: '';
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            width: 10px;
+            height: 10px;
+            background: #667eea;
+            border-radius: 50%;
+        }
+
+        .notification-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            flex-shrink: 0;
+        }
+
+        .icon-budget {
+            background: #fff5e6;
+        }
+
+        .icon-income {
+            background: #e6ffe6;
+        }
+
+        .icon-alert {
+            background: #ffe6e6;
+        }
+
+        .icon-goal {
+            background: #e6f2ff;
+        }
+
+        .icon-transaction {
+            background: #f0e6ff;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 8px;
+        }
+
+        .notification-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 6px;
+        }
+
+        .notification-message {
+            color: #718096;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+
+        .notification-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notification-time {
+            color: #a0aec0;
+            font-size: 13px;
+        }
+
+        .notification-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            font-size: 16px;
+        }
+
+        .read-btn {
+            background: #e6f2ff;
+        }
+
+        .read-btn:hover {
+            background: #cce4ff;
+            transform: scale(1.1);
+        }
+
+        .delete-btn {
+            background: #ffe6e6;
+        }
+
+        .delete-btn:hover {
+            background: #ffcccc;
+            transform: scale(1.1);
+        }
+
+        .empty-state {
+            background: white;
+            border-radius: 12px;
+            padding: 60px 40px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .empty-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-state h2 {
+            font-size: 24px;
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+
+        .empty-state p {
+            color: #718096;
+            font-size: 16px;
+        }
+
+        .notification-badge {
+            background: #667eea;
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 12px;
+            margin-left: 10px;
+        }
+
+        .filters-container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .filter-chip {
+            padding: 8px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 20px;
+            background: white;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #718096;
+            transition: all 0.3s;
+        }
+
+        .filter-chip:hover {
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        .filter-chip.active {
+            background: #667eea;
+            border-color: #667eea;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="main-content">
+            <div class="header">
+                <div class="header-left">
+                    <h1>Notifications <span class="notification-badge" id="unreadCount">3</span></h1>
+                    <p>Stay updated with your financial activities</p>
+                </div>
+                <div class="header-actions">
+                    <button class="mark-read-btn" onclick="markAllAsRead()">
+                        ✓ Mark all as read
+                    </button>
+                </div>
+            </div>
+
+            <div class="filters-container">
+                <div class="filter-chip active" onclick="filterNotifications('all')">All</div>
+                <div class="filter-chip" onclick="filterNotifications('budget')">Budget Alerts</div>
+                <div class="filter-chip" onclick="filterNotifications('income')">Income</div>
+                <div class="filter-chip" onclick="filterNotifications('alert')">Alerts</div>
+                <div class="filter-chip" onclick="filterNotifications('goal')">Goals</div>
+                <div class="filter-chip" onclick="filterNotifications('unread')">Unread Only</div>
+            </div>
+
+            <div class="notifications-container" id="notificationsContainer">
+                <!-- Unread Notification 1 -->
+                <div class="notification-card unread" data-type="budget" data-id="1">
+                    <div class="notification-icon icon-budget">💵</div>
+                    <div class="notification-content">
+                        <div class="notification-title">Budget Alert: Food & Dining</div>
+                        <div class="notification-message">
+                            You've used 70% of your Food & Dining budget ($420/$600). Consider reducing spending to stay within your limit.
+                        </div>
+                        <div class="notification-meta">
+                            <span class="notification-time">2 hours ago</span>
+                            <div class="notification-actions">
+                                <button class="action-btn read-btn" onclick="markAsRead(1)" title="Mark as read">✓</button>
+                                <button class="action-btn delete-btn" onclick="deleteNotification(1)" title="Delete">🗑️</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Unread Notification 2 -->
+                <div class="notification-card unread" data-type="income" data-id="2">
+                    <div class="notification-icon icon-income">💰</div>
+                    <div class="notification-content">
+                        <div class="notification-title">Monthly Salary Received</div>
+                        <div class="notification-message">
+                            Your salary of $8,400.00 has been credited to your account. Your total balance is now $24,580.
+                        </div>
+                        <div class="notification-meta">
+                            <span class="notification-time">1 day ago</span>
+                            <div class="notification-actions">
+                                <button class="action-btn read-btn" onclick="markAsRead(2)" title="Mark as read">✓</button>
+                                <button class="action-btn delete-btn" onclick="deleteNotification(2)" title="Delete">🗑️</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Unread Notification 3 -->
+                <div class="notification-card unread" data-type="alert" data-id="3">
+                    <div class="notification-icon icon-alert">⚠️</div>
+                    <div class="notification-content">
+                        <div class="notification-title">Unusual Spending Detected</div>
+                        <div class="notification-message">
+                            Your spending is 15% higher than usual this week. Review your transactions to identify any unexpected expenses.
+                        </div>
+                        <div class="notification-meta">
+                            <span class="notification-time">2 days ago</span>
+                            <div class="notification-actions">
+                                <button class="action-btn read-btn" onclick="markAsRead(3)" title="Mark as read">✓</button>
+                                <button class="action-btn delete-btn" onclick="deleteNotification(3)" title="Delete">🗑️</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Read Notification 4 -->
+                <div class="notification-card" data-type="budget" data-id="4">
+                    <div class="notification-icon icon-budget">💵</div>
+                    <div class="notification-content">
+                        <div class="notification-title">Budget Exceeded: Entertainment</div>
+                        <div class="notification-message">
+                            You've exceeded your Entertainment budget by $5. Total spent: $205 out of $200 budget.
+                        </div>
+                        <div class="notification-meta">
+                            <span class="notification-time">3 days ago</span>
+                            <div class="notification-actions">
+                                <button class="action-btn delete-btn" onclick="deleteNotification(4)" title="Delete">🗑️</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Read Notification 5 -->
+                <div class="notification-card" data-type="goal" data-id="5">
+                    <div class="notification-icon icon-goal">📈</div>
+                    <div class="notification-content">
+                        <div class="notification-title">Savings Goal Milestone</div>
+                        <div class="notification-message">
+                            Congratulations! You've reached 75% of your Emergency Fund goal. Keep up the great work!
+                        </div>
+                        <div class="notification-meta">
+                            <span class="notification-time">5 days ago</span>
+                            <div class="notification-actions">
+                                <button class="action-btn delete-btn" onclick="deleteNotification(5)" title="Delete">🗑️</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Read Notification 6 -->
+                <div class="notification-card" data-type="income" data-id="6">
+                    <div class="notification-icon icon-income">💰</div>
+                    <div class="notification-content">
+                        <div class="notification-title">Investment Returns</div>
+                        <div class="notification-message">
+                            Your investment portfolio gained $245 this month. Total portfolio value: $15,870.
+                        </div>
+                        <div class="notification-meta">
+                            <span class="notification-time">1 week ago</span>
+                            <div class="notification-actions">
+                                <button class="action-btn delete-btn" onclick="deleteNotification(6)" title="Delete">🗑️</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Read Notification 7 -->
+                <div class="notification-card" data-type="alert" data-id="7">
+                    <div class="notification-icon icon-transaction">💳</div>
+                    <div class="notification-content">
+                        <div class="notification-title">Large Transaction Alert</div>
+                        <div class="notification-message">
+                            A transaction of $1,250 was made at Electronics Store. If this wasn't you, please contact support.
+                        </div>
+                        <div class="notification-meta">
+                            <span class="notification-time">1 week ago</span>
+                            <div class="notification-actions">
+                                <button class="action-btn delete-btn" onclick="deleteNotification(7)" title="Delete">🗑️</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateUnreadCount() {
+            const unreadCards = document.querySelectorAll('.notification-card.unread');
+            const count = unreadCards.length;
+            const badge = document.getElementById('unreadCount');
+            
+            if (count > 0) {
+                badge.textContent = count;
+                badge.style.display = 'inline-block';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        function markAsRead(id) {
+            const card = document.querySelector(`[data-id="${id}"]`);
+            if (card) {
+                card.classList.remove('unread');
+                const readBtn = card.querySelector('.read-btn');
+                if (readBtn) {
+                    readBtn.remove();
+                }
+                updateUnreadCount();
+            }
+        }
+
+        function markAllAsRead() {
+            const unreadCards = document.querySelectorAll('.notification-card.unread');
+            unreadCards.forEach(card => {
+                card.classList.remove('unread');
+                const readBtn = card.querySelector('.read-btn');
+                if (readBtn) {
+                    readBtn.remove();
+                }
+            });
+            updateUnreadCount();
+        }
+
+        function deleteNotification(id) {
+            const card = document.querySelector(`[data-id="${id}"]`);
+            if (card) {
+                card.style.transform = 'translateX(100%)';
+                card.style.opacity = '0';
+                setTimeout(() => {
+                    card.remove();
+                    updateUnreadCount();
+                    checkEmptyState();
+                }, 300);
+            }
+        }
+
+        function checkEmptyState() {
+            const container = document.getElementById('notificationsContainer');
+            const cards = container.querySelectorAll('.notification-card');
+            
+            if (cards.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">🔔</div>
+                        <h2>No Notifications</h2>
+                        <p>You're all caught up! Check back later for updates.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function filterNotifications(type) {
+            // Update active filter chip
+            document.querySelectorAll('.filter-chip').forEach(chip => {
+                chip.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Filter notifications
+            const cards = document.querySelectorAll('.notification-card');
+            
+            cards.forEach(card => {
+                if (type === 'all') {
+                    card.style.display = 'flex';
+                } else if (type === 'unread') {
+                    card.style.display = card.classList.contains('unread') ? 'flex' : 'none';
+                } else {
+                    card.style.display = card.dataset.type === type ? 'flex' : 'none';
+                }
+            });
+        }
+
+        // Initialize unread count
+        updateUnreadCount();
+    </script>
+</body>
+</html>

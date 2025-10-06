@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Categories - CoinVault</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            margin-left: 240px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 28px;
+        }
+
+        .add-category-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .add-category-btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .category-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+        }
+
+        .category-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .category-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .category-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .category-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .category-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .edit-btn {
+            background: #e6f2ff;
+            color: #667eea;
+        }
+
+        .delete-btn {
+            background: #ffe6e6;
+            color: #e53e3e;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .category-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #718096;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+
+        .budget-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #718096;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: #2d3748;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #2d3748;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .icon-selector {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 10px;
+        }
+
+        .icon-option {
+            width: 50px;
+            height: 50px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 24px;
+            transition: all 0.3s;
+        }
+
+        .icon-option:hover, .icon-option.selected {
+            border-color: #667eea;
+            background: #e6f2ff;
+        }
+
+        .color-selector {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 10px;
+        }
+
+        .color-option {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .color-option:hover, .color-option.selected {
+            border-color: #2d3748;
+            transform: scale(1.1);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #2d3748;
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="main-content">
+            <div class="header">
+                <h1>Categories</h1>
+                <button class="add-category-btn" onclick="openModal()">+ Add Category</button>
+            </div>
+
+            <div class="categories-grid">
+                <!-- Food & Dining Category -->
+                <div class="category-card">
+                    <div class="category-header">
+                        <div class="category-info">
+                            <div class="category-icon" style="background: #fff5e6;">🍔</div>
+                            <div class="category-name">Food & Dining</div>
+                        </div>
+                        <div class="category-actions">
+                            <button class="action-btn edit-btn">✏️</button>
+                            <button class="action-btn delete-btn">🗑️</button>
+                        </div>
+                    </div>
+                    <div class="category-stats">
+                        <div class="stat">
+                            <div class="stat-label">Spent</div>
+                            <div class="stat-value">$420</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Budget</div>
+                            <div class="stat-value">$600</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Remaining</div>
+                            <div class="stat-value">$180</div>
+                        </div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 70%;"></div>
+                    </div>
+                    <div class="budget-info">
+                        <span>70% used</span>
+                        <span>15 transactions</span>
+                    </div>
+                </div>
+
+                <!-- Transportation Category -->
+                <div class="category-card">
+                    <div class="category-header">
+                        <div class="category-info">
+                            <div class="category-icon" style="background: #e6f2ff;">🚗</div>
+                            <div class="category-name">Transportation</div>
+                        </div>
+                        <div class="category-actions">
+                            <button class="action-btn edit-btn">✏️</button>
+                            <button class="action-btn delete-btn">🗑️</button>
+                        </div>
+                    </div>
+                    <div class="category-stats">
+                        <div class="stat">
+                            <div class="stat-label">Spent</div>
+                            <div class="stat-value">$180</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Budget</div>
+                            <div class="stat-value">$300</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Remaining</div>
+                            <div class="stat-value">$120</div>
+                        </div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 60%;"></div>
+                    </div>
+                    <div class="budget-info">
+                        <span>60% used</span>
+                        <span>8 transactions</span>
+                    </div>
+                </div>
+
+                <!-- Entertainment Category -->
+                <div class="category-card">
+                    <div class="category-header">
+                        <div class="category-info">
+                            <div class="category-icon" style="background: #ffe6f0;">🎬</div>
+                            <div class="category-name">Entertainment</div>
+                        </div>
+                        <div class="category-actions">
+                            <button class="action-btn edit-btn">✏️</button>
+                            <button class="action-btn delete-btn">🗑️</button>
+                        </div>
+                    </div>
+                    <div class="category-stats">
+                        <div class="stat">
+                            <div class="stat-label">Spent</div>
+                            <div class="stat-value">$95</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Budget</div>
+                            <div class="stat-value">$200</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Remaining</div>
+                            <div class="stat-value">$105</div>
+                        </div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 47.5%;"></div>
+                    </div>
+                    <div class="budget-info">
+                        <span>47% used</span>
+                        <span>6 transactions</span>
+                    </div>
+                </div>
+
+                <!-- Healthcare Category -->
+                <div class="category-card">
+                    <div class="category-header">
+                        <div class="category-info">
+                            <div class="category-icon" style="background: #e6ffe6;">🏥</div>
+                            <div class="category-name">Healthcare</div>
+                        </div>
+                        <div class="category-actions">
+                            <button class="action-btn edit-btn">✏️</button>
+                            <button class="action-btn delete-btn">🗑️</button>
+                        </div>
+                    </div>
+                    <div class="category-stats">
+                        <div class="stat">
+                            <div class="stat-label">Spent</div>
+                            <div class="stat-value">$140</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Budget</div>
+                            <div class="stat-value">$250</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Remaining</div>
+                            <div class="stat-value">$110</div>
+                        </div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 56%;"></div>
+                    </div>
+                    <div class="budget-info">
+                        <span>56% used</span>
+                        <span>4 transactions</span>
+                    </div>
+                </div>
+
+                <!-- Shopping Category -->
+                <div class="category-card">
+                    <div class="category-header">
+                        <div class="category-info">
+                            <div class="category-icon" style="background: #f0e6ff;">🛍️</div>
+                            <div class="category-name">Shopping</div>
+                        </div>
+                        <div class="category-actions">
+                            <button class="action-btn edit-btn">✏️</button>
+                            <button class="action-btn delete-btn">🗑️</button>
+                        </div>
+                    </div>
+                    <div class="category-stats">
+                        <div class="stat">
+                            <div class="stat-label">Spent</div>
+                            <div class="stat-value">$320</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Budget</div>
+                            <div class="stat-value">$400</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Remaining</div>
+                            <div class="stat-value">$80</div>
+                        </div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 80%;"></div>
+                    </div>
+                    <div class="budget-info">
+                        <span>80% used</span>
+                        <span>12 transactions</span>
+                    </div>
+                </div>
+
+                <!-- Utilities Category -->
+                <div class="category-card">
+                    <div class="category-header">
+                        <div class="category-info">
+                            <div class="category-icon" style="background: #ffffcc;">⚡</div>
+                            <div class="category-name">Utilities</div>
+                        </div>
+                        <div class="category-actions">
+                            <button class="action-btn edit-btn">✏️</button>
+                            <button class="action-btn delete-btn">🗑️</button>
+                        </div>
+                    </div>
+                    <div class="category-stats">
+                        <div class="stat">
+                            <div class="stat-label">Spent</div>
+                            <div class="stat-value">$245</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Budget</div>
+                            <div class="stat-value">$350</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Remaining</div>
+                            <div class="stat-value">$105</div>
+                        </div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 70%;"></div>
+                    </div>
+                    <div class="budget-info">
+                        <span>70% used</span>
+                        <span>5 transactions</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Category Modal -->
+    <div class="modal" id="categoryModal">
+        <div class="modal-content">
+            <h2 class="modal-header">Add New Category</h2>
+            <form>
+                <div class="form-group">
+                    <label class="form-label">Category Name</label>
+                    <input type="text" class="form-input" placeholder="Enter category name">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Select Icon</label>
+                    <div class="icon-selector">
+                        <div class="icon-option">🍔</div>
+                        <div class="icon-option">🚗</div>
+                        <div class="icon-option">🎬</div>
+                        <div class="icon-option">🏥</div>
+                        <div class="icon-option">🛍️</div>
+                        <div class="icon-option">⚡</div>
+                        <div class="icon-option">🏠</div>
+                        <div class="icon-option">✈️</div>
+                        <div class="icon-option">📚</div>
+                        <div class="icon-option">💪</div>
+                        <div class="icon-option">🎮</div>
+                        <div class="icon-option">☕</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Select Color</label>
+                    <div class="color-selector">
+                        <div class="color-option" style="background: #fff5e6;"></div>
+                        <div class="color-option" style="background: #e6f2ff;"></div>
+                        <div class="color-option" style="background: #ffe6f0;"></div>
+                        <div class="color-option" style="background: #e6ffe6;"></div>
+                        <div class="color-option" style="background: #f0e6ff;"></div>
+                        <div class="color-option" style="background: #ffffcc;"></div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Monthly Budget</label>
+                    <input type="number" class="form-input" placeholder="Enter budget amount">
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="modal-btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="modal-btn btn-primary">Add Category</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openModal() {
+            document.getElementById('categoryModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('categoryModal').classList.remove('active');
+        }
+
+        // Icon selection
+        document.querySelectorAll('.icon-option').forEach(icon => {
+            icon.addEventListener('click', function() {
+                document.querySelectorAll('.icon-option').forEach(i => i.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        // Color selection
+        document.querySelectorAll('.color-option').forEach(color => {
+            color.addEventListener('click', function() {
+                document.querySelectorAll('.color-option').forEach(c => c.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        // Close modal when clicking outside
+        document.getElementById('categoryModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
