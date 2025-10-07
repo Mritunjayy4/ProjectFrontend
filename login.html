@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CoinVault - Sign In</title>
-    <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CoinVault - Sign In</title>
+<style>
         * {
             margin: 0;
             padding: 0;
@@ -165,6 +165,14 @@
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
+        .form-input.error {
+            border-color: #fc8181;
+        }
+
+        .form-input.success {
+            border-color: #48bb78;
+        }
+
         .password-toggle {
             position: absolute;
             right: 16px;
@@ -205,18 +213,6 @@
             accent-color: #667eea;
         }
 
-        .forgot-link {
-            font-size: 14px;
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 600;
-            transition: color 0.2s;
-        }
-
-        .forgot-link:hover {
-            color: #764ba2;
-        }
-
         .btn {
             width: 100%;
             padding: 16px;
@@ -234,58 +230,18 @@
             margin-bottom: 16px;
         }
 
-        .btn-primary:hover {
+        .btn-primary:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
         }
 
-        .btn-primary:active {
+        .btn-primary:active:not(:disabled) {
             transform: translateY(0);
         }
 
-        .divider {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            margin: 24px 0;
-            color: #a0aec0;
-            font-size: 14px;
-        }
-
-        .divider::before,
-        .divider::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: #e2e8f0;
-        }
-
-        .social-buttons {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 24px;
-        }
-
-        .btn-social {
-            padding: 12px;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            background: white;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 14px;
-            color: #4a5568;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: all 0.2s;
-        }
-
-        .btn-social:hover {
-            border-color: #667eea;
-            background: #f7fafc;
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         .password-strength {
@@ -342,6 +298,20 @@
 
         .requirement.met {
             color: #38a169;
+        }
+
+        .password-match-message {
+            margin-top: 8px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .password-match-message.valid {
+            color: #38a169;
+        }
+
+        .password-match-message.invalid {
+            color: #e53e3e;
         }
 
         .footer-text {
@@ -405,301 +375,263 @@
             .auth-body {
                 padding: 30px 24px;
             }
-
-            .social-buttons {
-                grid-template-columns: 1fr;
-            }
         }
     </style>
 </head>
 <body>
-    <div class="auth-container">
-        <div class="auth-header">
-            <div class="logo">💰</div>
-            <div class="logo-text">CoinVault</div>
-            <div class="logo-subtitle">Smart Personal Finance Management</div>
-        </div>
+<div class="auth-container">
+<div class="auth-header">
+<div class="logo">💰</div>
+<div class="logo-text">CoinVault</div>
+<div class="logo-subtitle">Smart Personal Finance Management</div>
+</div>
+<div class="auth-body">
+<div class="alert alert-error show" th:if="${error}" th:text="${error}"></div>
+<div class="alert alert-success show" th:if="${success}" th:text="${success}"></div>
 
-        <div class="auth-body">
-            <!-- Alert Messages -->
-            <div id="alertBox" class="alert"></div>
+<!-- Alert Messages -->
+<div class="alert" id="alertBox"></div>
 
-            <!-- Tabs -->
-            <div class="tabs">
-                <button class="tab active" onclick="switchTab('login')">Sign In</button>
-                <button class="tab" onclick="switchTab('signup')">Sign Up</button>
-            </div>
+<!-- Tabs -->
+<div class="tabs">
+<button class="tab active" onclick="switchTab('login')">Sign In</button>
+<button class="tab" onclick="switchTab('signup')">Sign Up</button>
+</div>
 
-            <!-- Login Form -->
-            <div id="loginForm" class="form-container active">
-                <form onsubmit="handleLogin(event)">
-                    <div class="form-group">
-                        <label class="form-label">Email Address</label>
-                        <div class="input-wrapper">
-                            <span class="input-icon">📧</span>
-                            <input type="email" class="form-input" placeholder="Enter your email" required>
-                        </div>
-                    </div>
+<!-- Login Form -->
+<div class="form-container active" id="loginForm">
+<form th:action="@{/login}" method="post">
+<div class="form-group">
+<label class="form-label">Email Address</label>
+<div class="input-wrapper">
+<span class="input-icon">📧</span>
+<input class="form-input" name="email" placeholder="Enter your email" required="" type="email"/>
+</div>
+</div>
+<div class="form-group">
+<label class="form-label">Password</label>
+<div class="input-wrapper">
+<span class="input-icon">🔒</span>
+<input class="form-input" id="loginPassword" name="password" placeholder="Enter your password" required="" type="password"/>
+<button class="password-toggle" onclick="togglePassword('loginPassword')" type="button">👁️</button>
+</div>
+</div>
+<div class="checkbox-wrapper">
+<label class="checkbox-label">
+<input type="checkbox"/>
+<span>Remember me</span>
+</label>
+</div>
+<button class="btn btn-primary" type="submit">Sign In</button>
+</form>
 
-                    <div class="form-group">
-                        <label class="form-label">Password</label>
-                        <div class="input-wrapper">
-                            <span class="input-icon">🔒</span>
-                            <input type="password" id="loginPassword" class="form-input" placeholder="Enter your password" required>
-                            <button type="button" class="password-toggle" onclick="togglePassword('loginPassword')">👁️</button>
-                        </div>
-                    </div>
+<div class="footer-text">
+Don't have an account? <a href="#" onclick="switchTab('signup'); return false;">Sign up now</a>
+</div>
+</div>
 
-                    <div class="checkbox-wrapper">
-                        <label class="checkbox-label">
-                            <input type="checkbox">
-                            <span>Remember me</span>
-                        </label>
-                        <a href="#" class="forgot-link" onclick="showForgotPassword(event)">Forgot Password?</a>
-                    </div>
+<!-- Signup Form -->
+<div class="form-container" id="signupForm">
+<form th:action="@{/signup}" method="post" onsubmit="return validateSignupForm()">
+<div class="form-group">
+<label class="form-label">Full Name</label>
+<div class="input-wrapper">
+<span class="input-icon">👤</span>
+<input class="form-input" name="fullName" placeholder="Enter your full name" required="" type="text"/>
+</div>
+</div>
+<div class="form-group">
+<label class="form-label">Email Address</label>
+<div class="input-wrapper">
+<span class="input-icon">📧</span>
+<input class="form-input" name="email" placeholder="Enter your email" required="" type="email"/>
+</div>
+</div>
+<div class="form-group">
+<label class="form-label">Password</label>
+<div class="input-wrapper">
+<span class="input-icon">🔒</span>
+<input class="form-input" id="signupPassword" name="password" oninput="checkPasswordStrength(this.value); checkPasswordMatch();" placeholder="Create a password" required="" type="password"/>
+<button class="password-toggle" onclick="togglePassword('signupPassword')" type="button">👁️</button>
+</div>
+<div class="password-strength" id="passwordStrength">
+<div class="strength-bar" id="strengthBar"></div>
+</div>
+<div class="password-requirements" id="passwordRequirements">
+<div class="requirement" id="req-length">
+<span>•</span> At least 8 characters
+</div>
+<div class="requirement" id="req-uppercase">
+<span>•</span> One uppercase letter
+</div>
+<div class="requirement" id="req-number">
+<span>•</span> One number
+</div>
+<div class="requirement" id="req-special">
+<span>•</span> One special character
+</div>
+</div>
+</div>
+<div class="form-group">
+<label class="form-label">Confirm Password</label>
+<div class="input-wrapper">
+<span class="input-icon">🔒</span>
+<input class="form-input" id="confirmPassword" name="confirmPassword" oninput="checkPasswordMatch()" placeholder="Confirm your password" required="" type="password"/>
+<button class="password-toggle" onclick="togglePassword('confirmPassword')" type="button">👁️</button>
+</div>
+<div id="passwordMatchMessage" class="password-match-message"></div>
+</div>
+<div class="checkbox-wrapper" style="margin-bottom: 24px;">
+<label class="checkbox-label">
+<input required="" type="checkbox" id="termsCheckbox"/>
+<span>I agree to the <a class="forgot-link" href="#">Terms &amp; Conditions</a></span>
+</label>
+</div>
+<button class="btn btn-primary" id="signupButton" type="submit" disabled>Create Account</button>
+</form>
 
-                    <button type="submit" class="btn btn-primary">Sign In</button>
-                </form>
+<div class="footer-text">
+Already have an account? <a href="#" onclick="switchTab('login'); return false;">Sign in</a>
+</div>
+</div>
 
-                <div class="divider">or continue with</div>
+</div>
+</div>
 
-                <div class="social-buttons">
-                    <button class="btn-social" onclick="handleSocialLogin('google')">
-                        <span>🔵</span> Google
-                    </button>
-                    <button class="btn-social" onclick="handleSocialLogin('facebook')">
-                        <span>📘</span> Facebook
-                    </button>
-                </div>
+<script>
+function switchTab(tab) {
+    // Remove active class from all tabs and forms
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.form-container').forEach(f => f.classList.remove('active'));
 
-                <div class="footer-text">
-                    Don't have an account? <a href="#" onclick="switchTab('signup'); return false;">Sign up now</a>
-                </div>
-            </div>
+    // Add active class to selected tab
+    if (tab === 'login') {
+        document.querySelectorAll('.tab')[0].classList.add('active');
+        document.getElementById('loginForm').classList.add('active');
+    } else if (tab === 'signup') {
+        document.querySelectorAll('.tab')[1].classList.add('active');
+        document.getElementById('signupForm').classList.add('active');
+    }
 
-            <!-- Signup Form -->
-            <div id="signupForm" class="form-container">
-                <form onsubmit="handleSignup(event)">
-                    <div class="form-group">
-                        <label class="form-label">Full Name</label>
-                        <div class="input-wrapper">
-                            <span class="input-icon">👤</span>
-                            <input type="text" class="form-input" placeholder="Enter your full name" required>
-                        </div>
-                    </div>
+    // Hide alert
+    hideAlert();
+}
 
-                    <div class="form-group">
-                        <label class="form-label">Email Address</label>
-                        <div class="input-wrapper">
-                            <span class="input-icon">📧</span>
-                            <input type="email" class="form-input" placeholder="Enter your email" required>
-                        </div>
-                    </div>
+function togglePassword(inputId) {
+    const input = document.getElementById(inputId);
+    input.type = input.type === 'password' ? 'text' : 'password';
+}
 
-                    <div class="form-group">
-                        <label class="form-label">Password</label>
-                        <div class="input-wrapper">
-                            <span class="input-icon">🔒</span>
-                            <input type="password" id="signupPassword" class="form-input" placeholder="Create a password" required oninput="checkPasswordStrength(this.value)">
-                            <button type="button" class="password-toggle" onclick="togglePassword('signupPassword')">👁️</button>
-                        </div>
-                        <div id="passwordStrength" class="password-strength">
-                            <div id="strengthBar" class="strength-bar"></div>
-                        </div>
-                        <div id="passwordRequirements" class="password-requirements">
-                            <div class="requirement" id="req-length">
-                                <span>•</span> At least 8 characters
-                            </div>
-                            <div class="requirement" id="req-uppercase">
-                                <span>•</span> One uppercase letter
-                            </div>
-                            <div class="requirement" id="req-number">
-                                <span>•</span> One number
-                            </div>
-                            <div class="requirement" id="req-special">
-                                <span>•</span> One special character
-                            </div>
-                        </div>
-                    </div>
+function checkPasswordStrength(password) {
+    const strengthDiv = document.getElementById('passwordStrength');
+    const strengthBar = document.getElementById('strengthBar');
+    const requirementsDiv = document.getElementById('passwordRequirements');
 
-                    <div class="form-group">
-                        <label class="form-label">Confirm Password</label>
-                        <div class="input-wrapper">
-                            <span class="input-icon">🔒</span>
-                            <input type="password" id="confirmPassword" class="form-input" placeholder="Confirm your password" required>
-                            <button type="button" class="password-toggle" onclick="togglePassword('confirmPassword')">👁️</button>
-                        </div>
-                    </div>
+    if (password.length > 0) {
+        strengthDiv.classList.add('show');
+        requirementsDiv.classList.add('show');
+    } else {
+        strengthDiv.classList.remove('show');
+        requirementsDiv.classList.remove('show');
+        return;
+    }
 
-                    <div class="checkbox-wrapper" style="margin-bottom: 24px;">
-                        <label class="checkbox-label">
-                            <input type="checkbox" required>
-                            <span>I agree to the <a href="#" class="forgot-link">Terms & Conditions</a></span>
-                        </label>
-                    </div>
+    // Check requirements
+    const hasLength = password.length >= 8;
+    const hasUppercase = /[A-Z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
 
-                    <button type="submit" class="btn btn-primary">Create Account</button>
-                </form>
+    document.getElementById('req-length').classList.toggle('met', hasLength);
+    document.getElementById('req-uppercase').classList.toggle('met', hasUppercase);
+    document.getElementById('req-number').classList.toggle('met', hasNumber);
+    document.getElementById('req-special').classList.toggle('met', hasSpecial);
 
-                <div class="divider">or sign up with</div>
+    // Calculate strength
+    const strength = [hasLength, hasUppercase, hasNumber, hasSpecial].filter(Boolean).length;
 
-                <div class="social-buttons">
-                    <button class="btn-social" onclick="handleSocialLogin('google')">
-                        <span>🔵</span> Google
-                    </button>
-                    <button class="btn-social" onclick="handleSocialLogin('facebook')">
-                        <span>📘</span> Facebook
-                    </button>
-                </div>
+    strengthBar.className = 'strength-bar';
+    if (strength <= 2) {
+        strengthBar.classList.add('strength-weak');
+    } else if (strength === 3) {
+        strengthBar.classList.add('strength-medium');
+    } else {
+        strengthBar.classList.add('strength-strong');
+    }
+}
 
-                <div class="footer-text">
-                    Already have an account? <a href="#" onclick="switchTab('login'); return false;">Sign in</a>
-                </div>
-            </div>
+function checkPasswordMatch() {
+    const password = document.getElementById('signupPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    const messageDiv = document.getElementById('passwordMatchMessage');
+    const signupButton = document.getElementById('signupButton');
+    const confirmInput = document.getElementById('confirmPassword');
 
-            <!-- Forgot Password Form -->
-            <div id="forgotForm" class="form-container">
-                <div style="text-align: center; margin-bottom: 24px;">
-                    <div style="font-size: 48px; margin-bottom: 12px;">🔑</div>
-                    <h2 style="font-size: 22px; color: #2d3748; margin-bottom: 8px;">Forgot Password?</h2>
-                    <p style="font-size: 14px; color: #718096;">Enter your email to reset your password</p>
-                </div>
+    // If confirm password is empty, don't show any message
+    if (confirmPassword.length === 0) {
+        messageDiv.textContent = '';
+        messageDiv.className = 'password-match-message';
+        confirmInput.classList.remove('error', 'success');
+        signupButton.disabled = true;
+        return;
+    }
 
-                <form onsubmit="handleForgotPassword(event)">
-                    <div class="form-group">
-                        <label class="form-label">Email Address</label>
-                        <div class="input-wrapper">
-                            <span class="input-icon">📧</span>
-                            <input type="email" class="form-input" placeholder="Enter your email" required>
-                        </div>
-                    </div>
+    // Check if passwords match
+    if (password === confirmPassword) {
+        messageDiv.textContent = '✓ Passwords match';
+        messageDiv.className = 'password-match-message valid';
+        confirmInput.classList.remove('error');
+        confirmInput.classList.add('success');
+        
+        // Enable button only if passwords match and terms are checked
+        const termsChecked = document.getElementById('termsCheckbox').checked;
+        signupButton.disabled = !termsChecked;
+    } else {
+        messageDiv.textContent = '✗ Passwords do not match';
+        messageDiv.className = 'password-match-message invalid';
+        confirmInput.classList.remove('success');
+        confirmInput.classList.add('error');
+        signupButton.disabled = true;
+    }
+}
 
-                    <button type="submit" class="btn btn-primary">Send Reset Link</button>
-                </form>
+function validateSignupForm() {
+    const password = document.getElementById('signupPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
 
-                <div class="footer-text">
-                    <a href="#" onclick="switchTab('login'); return false;">← Back to Sign In</a>
-                </div>
-            </div>
-        </div>
-    </div>
+    if (password !== confirmPassword) {
+        showAlert('Passwords do not match!', 'error');
+        return false;
+    }
 
-    <script>
-        function switchTab(tab) {
-            // Remove active class from all tabs and forms
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.form-container').forEach(f => f.classList.remove('active'));
+    return true;
+}
 
-            // Add active class to selected tab
-            if (tab === 'login') {
-                document.querySelectorAll('.tab')[0].classList.add('active');
-                document.getElementById('loginForm').classList.add('active');
-            } else if (tab === 'signup') {
-                document.querySelectorAll('.tab')[1].classList.add('active');
-                document.getElementById('signupForm').classList.add('active');
-            }
+function showAlert(message, type) {
+    const alertBox = document.getElementById('alertBox');
+    alertBox.textContent = message;
+    alertBox.className = 'alert alert-' + type + ' show';
+}
 
-            // Hide alert
-            hideAlert();
-        }
+function hideAlert() {
+    const alertBox = document.getElementById('alertBox');
+    alertBox.classList.remove('show');
+}
 
-        function togglePassword(inputId) {
-            const input = document.getElementById(inputId);
-            input.type = input.type === 'password' ? 'text' : 'password';
-        }
+// Enable/disable signup button when terms checkbox is clicked
+document.addEventListener('DOMContentLoaded', function() {
+    const termsCheckbox = document.getElementById('termsCheckbox');
+    if (termsCheckbox) {
+        termsCheckbox.addEventListener('change', checkPasswordMatch);
+    }
+});
+</script>
 
-        function checkPasswordStrength(password) {
-            const strengthDiv = document.getElementById('passwordStrength');
-            const strengthBar = document.getElementById('strengthBar');
-            const requirementsDiv = document.getElementById('passwordRequirements');
-
-            if (password.length > 0) {
-                strengthDiv.classList.add('show');
-                requirementsDiv.classList.add('show');
-            } else {
-                strengthDiv.classList.remove('show');
-                requirementsDiv.classList.remove('show');
-                return;
-            }
-
-            // Check requirements
-            const hasLength = password.length >= 8;
-            const hasUppercase = /[A-Z]/.test(password);
-            const hasNumber = /[0-9]/.test(password);
-            const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-
-            document.getElementById('req-length').classList.toggle('met', hasLength);
-            document.getElementById('req-uppercase').classList.toggle('met', hasUppercase);
-            document.getElementById('req-number').classList.toggle('met', hasNumber);
-            document.getElementById('req-special').classList.toggle('met', hasSpecial);
-
-            // Calculate strength
-            const strength = [hasLength, hasUppercase, hasNumber, hasSpecial].filter(Boolean).length;
-
-            strengthBar.className = 'strength-bar';
-            if (strength <= 2) {
-                strengthBar.classList.add('strength-weak');
-            } else if (strength === 3) {
-                strengthBar.classList.add('strength-medium');
-            } else {
-                strengthBar.classList.add('strength-strong');
-            }
-        }
-
-        function showAlert(message, type) {
-            const alertBox = document.getElementById('alertBox');
-            alertBox.textContent = message;
-            alertBox.className = 'alert alert-' + type + ' show';
-        }
-
-        function hideAlert() {
-            const alertBox = document.getElementById('alertBox');
-            alertBox.classList.remove('show');
-        }
-
-        function handleLogin(event) {
-            event.preventDefault();
-            showAlert('✓ Login successful! Redirecting to dashboard...', 'success');
-            setTimeout(() => {
-                // Redirect to dashboard
-                window.location.href = 'dashboard.html';
-            }, 2000);
-        }
-
-        function handleSignup(event) {
-            event.preventDefault();
-            const password = document.getElementById('signupPassword').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-
-            if (password !== confirmPassword) {
-                showAlert('✗ Passwords do not match!', 'error');
-                return;
-            }
-
-            showAlert('✓ Account created successfully! Please check your email to verify.', 'success');
-            setTimeout(() => {
-                switchTab('login');
-            }, 2000);
-        }
-
-        function handleForgotPassword(event) {
-            event.preventDefault();
-            showAlert('✓ Password reset link sent! Check your email.', 'success');
-            setTimeout(() => {
-                switchTab('login');
-            }, 2000);
-        }
-
-        function showForgotPassword(event) {
-            event.preventDefault();
-            document.querySelectorAll('.form-container').forEach(f => f.classList.remove('active'));
-            document.getElementById('forgotForm').classList.add('active');
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        }
-
-        function handleSocialLogin(provider) {
-            showAlert('Redirecting to ' + provider + ' authentication...', 'success');
-        }
-    </script>
+<script>
+// Open signup tab if signupOpen is true (Thymeleaf)
+if (/*[[${signupOpen}]]*/ false) {
+    switchTab('signup');
+}
+</script>
 </body>
 </html>
